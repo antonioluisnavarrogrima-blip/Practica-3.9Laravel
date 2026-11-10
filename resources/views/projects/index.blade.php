@@ -32,6 +32,23 @@
 </head>
 
 <body>
+    <div style="float: right;">
+    @auth
+        <!-- Si el usuario YA ha iniciado sesión: muestra su nombre y botón de salir -->
+        <span>Has iniciado sesión como:<strong>{{ Auth::user()->name }}</strong></span>
+        
+        <form action="{{ route('logout') }}" method="POST" style="display: inline; margin-left: 10px;">
+            @csrf
+            <button type="submit">Cerrar Sesión</button>
+        </form>
+    @else
+        <!-- Si el usuario es un invitado (NO ha iniciado sesión) -->
+        <a href="{{ route('login') }}"><button>Iniciar Sesión</button></a>
+        <a href="{{ route('register') }}"><button>Registrarse</button></a>
+    @endauth
+</div>
+<br style="clear: both;">
+    <br style="clear:right;">
     <h1>Proyectos:</h1>
     <br>
     <a style="float: right; background-color: blue; color: white; padding: 8px 12px; text-decoration: none; border-radius: 4px;"
@@ -54,8 +71,14 @@
                 <td>{{$project->status}}</td>
                 <td>
                     <a href="{{ route('projects.show', $project) }}"><button>Ver</button></a>
-                    <a href="{{  route('projects.index')}}"><button>Editar</button></a>
-                    <a href="{{ route('projects.index')  }}"><button>Eliminar</button></a>
+                    <a href="{{  route('projects.edit', $project)}}"><button>Editar</button></a>
+                    <form action="{{ route('projects.destroy', $project) }}" method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" onclick="return confirm('¿Seguro que deseas eliminar este proyecto?')">
+                            Eliminar
+                        </button>
+                    </form>
 
                 </td>
 

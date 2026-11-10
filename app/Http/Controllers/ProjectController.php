@@ -62,7 +62,10 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        //
+        if ($project->user_id !== Auth::id()) {
+            abort(403, 'No tienes autorización para editar este proyecto.');
+        }
+        return view('projects.edit', compact('project'));
     }
 
     /**
@@ -70,7 +73,20 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        //
+        if ($project->user_id !== Auth::id()) {
+            abort(403, 'No tienes autorización para editar este proyecto.');
+        }
+        //// 1. Validar los datos recibidos
+        $validated = $request->validate([
+            'title'       => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'due_date'    => 'nullable|date',
+            'status'      => 'required|string|in:pendiente,en_progreso,completado,cancelado',
+        ]);
+        // 2. Actualizar el proyecto en la base de datos
+        $project->update($validated);
+        // 3. Redirigir al listado con un mensaje de éxito
+        return redirect()->route('projects.index')->with('success', 'Proyecto actualizado correctamente.');
     }
 
     /**
@@ -79,5 +95,12 @@ class ProjectController extends Controller
     public function destroy(Project $project)
     {
         //
+        if ($project->user_id !== Auth::id()) {
+            abort(403, 'No tienes autorización para eliminar este proyecto.');
+        }
+         $project->delete();
+        // 3. Redirigir de vuelta al listado
+        return redirect()->route('projects.index')->with('success', 'Proyecto eliminado correctamente.');
+
     }
 }
