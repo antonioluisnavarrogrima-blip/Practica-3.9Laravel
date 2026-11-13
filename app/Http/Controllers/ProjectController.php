@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,7 +14,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $projects= Project::all();
+        $projects = Project::all();
         return view('projects.index', compact('projects'));
     }
 
@@ -22,7 +23,11 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        return view('projects.create');
+        if (!Auth::check()) {
+            return redirect()->route('register')->with('error', 'Necesitas una cuenta para poder crear un proyecto.');
+        }
+        $users = User::all();
+        return view('projects.create', compact('users'));
     }
 
     /**
@@ -34,17 +39,27 @@ class ProjectController extends Controller
         if (!Auth::check()) {
             return redirect()->route('register')->with('error', 'Necesitas una cuenta para poder crear un proyecto.');
         }
-         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'due_date'    => 'nullable|date',
-            'status'      => 'required|string|in:pendiente,en_progreso,completado,cancelado',
+            'due_date' => 'nullable|date',
+            'status' => 'required|string|in:pendiente,en_progreso,completado,cancelado',
         ]);
-        $validated['user_id']=Auth::id();
-        Project::create($validated);
-        return redirect()->route('projects.index')->with('success', 'Proyecto creado correctamente.');
+
+        $validated['user_id'] = Auth::id();
+        $project = Project::create($validated);
+
+        // Si seleccionó participantes:
+        if ($request->has('users')) {
+            $project->users()->attach($request->users, [
+                'role' => 'Colaborador',
+                'contribution_hours' => 0,
+            ]);
+        }
+
+        return redirect()->route('projects.index')->with('success', 'Proyecto creado con éxito.');
     }
-    
+
 
     /**
      * Display the specified resource.
@@ -52,9 +67,12 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         //El enrutador recibe el id del proyecto que se quiere ver
-        
+        if ($project->user_id !== Auth::id()) {
+            abort(401, 'No tienes autorización para editar este proyecto.');
+        }
+        $project->load('users', 'creator');
         return view('projects.show', compact('project'));
-        
+
     }
 
     /**
@@ -63,9 +81,11 @@ class ProjectController extends Controller
     public function edit(Project $project)
     {
         if ($project->user_id !== Auth::id()) {
-            abort(403, 'No tienes autorización para editar este proyecto.');
+            abort(403, 'No tienes permisos para editar este proyecto.');
         }
-        return view('projects.edit', compact('project'));
+        $project->load('users'); // Carga los participantes actuales
+        $users = User::all();    // Todos los usuarios para poder añadir nuevos
+        return view('projects.edit', compact('project', 'users'));
     }
 
     /**
@@ -74,19 +94,39 @@ class ProjectController extends Controller
     public function update(Request $request, Project $project)
     {
         if ($project->user_id !== Auth::id()) {
-            abort(403, 'No tienes autorización para editar este proyecto.');
+            abort(403, 'No tienes permisos de edición');
         }
-        //// 1. Validar los datos recibidos
+
+        // 1. Validar los campos del proyecto
         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'due_date'    => 'nullable|date',
-            'status'      => 'required|string|in:pendiente,en_progreso,completado,cancelado',
+            'due_date' => 'nullable|date',
+            'status' => 'required|string|in:pendiente,en_progreso,completado,cancelado',
         ]);
-        // 2. Actualizar el proyecto en la base de datos
+
         $project->update($validated);
-        // 3. Redirigir al listado con un mensaje de éxito
-        return redirect()->route('projects.index')->with('success', 'Proyecto actualizado correctamente.');
+
+        // 2. ACTUALIZAR los participantes existentes que se hayan editado
+        if ($request->has('existing_users')) {
+            foreach ($request->existing_users as $userId => $pivotData) {
+                $project->users()->updateExistingPivot($userId, [
+                    'role' => $pivotData['role'],
+                    'contribution_hours' => $pivotData['contribution_hours'],
+                ]);
+            }
+        }
+
+        // Si seleccionó al menos un usuario:
+        if ($request->has('users')) {
+            // Asocia los IDs [1, 3, 5] con los valores por defecto del pivote
+            $project->users()->attach($request->users, [
+                'role' => 'Colaborador',
+                'contribution_hours' => 0,
+            ]);
+        }
+
+        return redirect()->route('projects.index')->with('success', 'Proyecto y participantes actualizados.');
     }
 
     /**
@@ -96,9 +136,9 @@ class ProjectController extends Controller
     {
         //
         if ($project->user_id !== Auth::id()) {
-            abort(403, 'No tienes autorización para eliminar este proyecto.');
+            abort(403, 'No tienes permisos para eliminar este proyecto.');
         }
-         $project->delete();
+        $project->delete();
         // 3. Redirigir de vuelta al listado
         return redirect()->route('projects.index')->with('success', 'Proyecto eliminado correctamente.');
 

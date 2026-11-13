@@ -29,4 +29,18 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // 1:N - Proyectos creados por este usuario
+    public function createdProjects(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Project::class, 'user_id');
+    }
+
+    // N:N - Proyectos en los que este usuario participa
+    public function participatingProjects(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'project_user')
+            ->withPivot('role', 'contribution_hours')
+            ->withTimestamps();
+    }
 }

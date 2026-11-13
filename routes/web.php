@@ -6,7 +6,7 @@ use App\Http\Controllers\ProjectController;
 
 Route::redirect('/', '/projects');
 
-Route::resource('projects', ProjectController::class);
+Route::resource('projects', ProjectController::class)->middleware('auth');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

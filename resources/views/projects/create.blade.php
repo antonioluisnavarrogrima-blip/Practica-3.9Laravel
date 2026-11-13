@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,14 +12,17 @@
             margin: 40px auto;
             padding: 20px;
         }
+
         .form-group {
             margin-bottom: 16px;
         }
+
         label {
             display: block;
             margin-bottom: 6px;
             font-weight: bold;
         }
+
         input[type="text"],
         input[type="date"],
         textarea,
@@ -29,6 +33,7 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+
         .btn {
             background-color: #2563eb;
             color: white;
@@ -38,9 +43,11 @@
             cursor: pointer;
             font-size: 16px;
         }
+
         .btn:hover {
             background-color: #1d4ed8;
         }
+
         .btn-cancel {
             background-color: #6b7280;
             margin-left: 8px;
@@ -49,6 +56,7 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Creación de un nuevo proyecto</h1>
 
@@ -64,7 +72,8 @@
         <!-- Descripción -->
         <div class="form-group">
             <label for="description">Descripción:</label>
-            <textarea id="description" name="description" rows="4" required placeholder="Detalles y objetivos del proyecto..."></textarea>
+            <textarea id="description" name="description" rows="4" required
+                placeholder="Detalles y objetivos del proyecto..."></textarea>
         </div>
 
         <!-- Fecha Límite -->
@@ -83,13 +92,23 @@
                 <option value="cancelado">Cancelado</option>
             </select>
         </div>
-
-        <!-- Botones de Acción -->
+        <!-- Sección 2: Añadir un participante NUEVO si se desea -->
+        <h3>Añadir Nuevo Participante:</h3>
         <div class="form-group">
-            <button type="submit" class="btn">Guardar Proyecto</button>
-            <a href="{{ route('projects.index') }}" class="btn btn-cancel">Cancelar</a>
-        </div>
+            <label for="new_user_id">Seleccionar Usuario:</label>
+            <select name="users[]" id="users" multiple>
+                @foreach ($users as $user)
+                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                @endforeach
+            </select>
+
+            <!-- Botones de Acción -->
+            <div class="form-group">
+                <button type="submit" class="btn">Guardar Proyecto</button>
+                <a href="{{ route('projects.index') }}" class="btn btn-cancel">Cancelar</a>
+            </div>
     </form>
-    
+
 </body>
+
 </html>
