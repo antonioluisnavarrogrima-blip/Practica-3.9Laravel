@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Proyecto</title>
+    <!-- Estilos de maquetación del formulario de creación -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -60,29 +61,30 @@
 <body>
     <h1>Creación de un nuevo proyecto</h1>
 
+    <!-- Formulario de creación: envía por POST a route('projects.store') sin parámetros en URL -->
     <form action="{{ route('projects.store') }}" method="POST">
+        <!-- Token de seguridad CSRF obligatorio en Laravel -->
         @csrf
 
-        <!-- Título -->
+        <!-- Campo: Título -->
         <div class="form-group">
             <label for="title">Título del Proyecto:</label>
             <input type="text" id="title" name="title" required placeholder="Ej. Sistema de Inventario">
         </div>
 
-        <!-- Descripción -->
+        <!-- Campo: Descripción -->
         <div class="form-group">
             <label for="description">Descripción:</label>
-            <textarea id="description" name="description" rows="4" required
-                placeholder="Detalles y objetivos del proyecto..."></textarea>
+            <textarea id="description" name="description" rows="4" placeholder="Detalles y objetivos del proyecto..."></textarea>
         </div>
 
-        <!-- Fecha Límite -->
+        <!-- Campo: Fecha Límite -->
         <div class="form-group">
             <label for="due_date">Fecha Límite:</label>
-            <input type="date" id="due_date" name="due_date" required>
+            <input type="date" id="due_date" name="due_date">
         </div>
 
-        <!-- Estado -->
+        <!-- Campo: Estado inicial del proyecto -->
         <div class="form-group">
             <label for="status">Estado:</label>
             <select id="status" name="status" required>
@@ -92,21 +94,24 @@
                 <option value="cancelado">Cancelado</option>
             </select>
         </div>
-        <!-- Sección 2: Añadir un participante NUEVO si se desea -->
-        <h3>Añadir Nuevo Participante:</h3>
+
+        <!-- Selección de participantes iniciales -->
+        <h3>Añadir Participantes Iniciales:</h3>
         <div class="form-group">
-            <label for="new_user_id">Seleccionar Usuario:</label>
-            <select name="users[]" id="users" multiple>
+            <label for="users">Seleccionar Usuarios (puedes seleccionar varios):</label>
+            <!-- Select múltiple con nombre 'users[]' para enviar un array de IDs a store() -->
+            <select name="users[]" id="users" multiple style="height: 100px;">
                 @foreach ($users as $user)
                     <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
                 @endforeach
             </select>
+        </div>
 
-            <!-- Botones de Acción -->
-            <div class="form-group">
-                <button type="submit" class="btn">Guardar Proyecto</button>
-                <a href="{{ route('projects.index') }}" class="btn btn-cancel">Cancelar</a>
-            </div>
+        <!-- Botones de Acción -->
+        <div class="form-group">
+            <button type="submit" class="btn">Guardar Proyecto</button>
+            <a href="{{ route('projects.index') }}" class="btn btn-cancel">Cancelar</a>
+        </div>
     </form>
 
 </body>

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $project->title }}</title>
+    <!-- Estilos de maquetación para la vista de consulta -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -37,42 +38,54 @@
 </head>
 
 <body>
+    <!-- Campo: Título del Proyecto (Deshabilitado para solo lectura) -->
     <div class="form-group">
         <label for="title">Título del Proyecto:</label>
         <input value="{{ $project->title }}" disabled>
     </div>
 
-    <!-- Descripción -->
+    <!-- Campo: Descripción del Proyecto (Deshabilitado) -->
     <div class="form-group">
         <label for="description">Descripción:</label>
         <textarea disabled>{{ $project->description }}</textarea>
     </div>
 
-    <!-- Fecha Límite -->
+    <!-- Campo: Fecha Límite (Deshabilitado) -->
     <div class="form-group">
         <label for="due_date">Fecha Límite:</label>
         <input value="{{ $project->due_date }}" disabled>
     </div>
 
-    <!-- Estado -->
+    <!-- Campo: Estado actual del proyecto (Desplegable deshabilitado) -->
     <div class="form-group">
         <label for="status">Estado:</label>
         <select disabled>
             <option>{{ $project->status }}</option>
         </select>
     </div>
-    <p>Creado por: <strong>{{ $project->creator->name }}</strong>({{ $project->creator->email }})</p>
-    <!-- Lista de participantes (Relación N:N en la tabla intermedia) -->
+
+    <!-- Información del creador del proyecto (Relación 1:N con la tabla users vía $project->creator) -->
+    <p>Creado por: <strong>{{ $project->creator->name }}</strong> ({{ $project->creator->email }})</p>
+
+    <!-- Lista de usuarios participantes (Relación N:N obtenida desde la tabla intermedia 'project_user') -->
     <h3>Participantes:</h3>
     <ul>
+        <!-- Itera sobre los participantes cargados en $project->users -->
         @forelse ($project->users as $user)
             <li>
-                {{ $user->name }} - Rol: {{ $user->pivot->role }}
+                <!-- Muestra nombre, email y los campos guardados en la tabla pivote: role y contribution_hours -->
+                {{ $user->name }} ({{ $user->email }}) - Rol: <strong>{{ $user->pivot->role }}</strong> | Horas: <strong>{{ $user->pivot->contribution_hours }} hrs</strong>
             </li>
         @empty
-            <li>No hay participantes asignados.</li>
+            <!-- Mensaje mostrado si ningún usuario está asociado en la tabla pivote -->
+            <li>No hay participantes asignados a este proyecto.</li>
         @endforelse
     </ul>
+
+    <!-- Enlace de retorno al listado principal -->
+    <div style="margin-top: 20px;">
+        <a href="{{ route('projects.index') }}">Volver al listado de proyectos</a>
+    </div>
 
 </body>
 

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar: {{ $project->title }}</title>
+    <!-- Estilos de maquetación del formulario de edición -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -60,29 +61,32 @@
 <body>
     <h1>Editar Proyecto</h1>
 
+    <!-- Formulario de actualización: apunta a 'projects.update' pasando el modelo $project -->
     <form action="{{ route('projects.update', $project) }}" method="POST">
+        <!-- Token de protección obligatoria CSRF -->
         @csrf
+        <!-- @method('PUT'): Instruye a Laravel para que interprete esta petición POST como método HTTP PUT -->
         @method('PUT')
 
-        <!-- Título -->
+        <!-- Campo: Título -->
         <div class="form-group">
             <label for="title">Título del Proyecto:</label>
             <input type="text" id="title" name="title" value="{{ $project->title }}" required>
         </div>
 
-        <!-- Descripción -->
+        <!-- Campo: Descripción -->
         <div class="form-group">
             <label for="description">Descripción:</label>
             <textarea id="description" name="description" rows="4" required>{{ $project->description }}</textarea>
         </div>
 
-        <!-- Fecha Límite -->
+        <!-- Campo: Fecha Límite -->
         <div class="form-group">
             <label for="due_date">Fecha Límite:</label>
             <input type="date" id="due_date" name="due_date" value="{{ $project->due_date }}" required>
         </div>
 
-        <!-- Estado -->
+        <!-- Campo: Estado (Usa @selected para marcar dinámicamente el estado actual) -->
         <div class="form-group">
             <label for="status">Estado:</label>
             <select id="status" name="status" required>
@@ -92,12 +96,11 @@
                 <option value="cancelado" @selected($project->status == 'cancelado')>Cancelado</option>
             </select>
         </div>
-                <!-- Creador -->
+
+        <!-- Identificación del creador del proyecto -->
         <p>Creado por: <strong>{{ $project->creator->name }}</strong> ({{ $project->creator->email }})</p>
 
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
-
-               <!-- Sección 1: Editar participantes ya existentes -->
+        <!-- SECCIÓN 1: EDICIÓN EN LOTE DE PARTICIPANTES YA ASIGNADOS -->
         <h3>Participantes Actuales:</h3>
         @if ($project->users->isNotEmpty())
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
@@ -109,15 +112,15 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Itera sobre los participantes para crear inputs editables indexados por su ID de usuario -->
                     @foreach ($project->users as $user)
                         <tr>
-                            <!-- Nombre y email del participante -->
                             <td style="padding: 8px; border: 1px solid #ddd;">
                                 <strong>{{ $user->name }}</strong><br>
                                 <small style="color: #666;">{{ $user->email }}</small>
                             </td>
 
-                            <!-- Input editable para el ROL de este usuario -->
+                            <!-- Input para editar el Rol del participante en la tabla pivote -->
                             <td style="padding: 8px; border: 1px solid #ddd;">
                                 <input type="text" 
                                        name="existing_users[{{ $user->id }}][role]" 
@@ -126,7 +129,7 @@
                                        style="width: 90%; padding: 6px;">
                             </td>
 
-                            <!-- Input editable para las HORAS de este usuario -->
+                            <!-- Input para editar las Horas del participante en la tabla pivote -->
                             <td style="padding: 8px; border: 1px solid #ddd;">
                                 <input type="number" 
                                        name="existing_users[{{ $user->id }}][contribution_hours]" 
@@ -145,13 +148,14 @@
 
         <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
 
-        <!-- Sección 2: Añadir un participante NUEVO si se desea -->
-        <h3>Añadir Nuevo Participante:</h3>
+        <!-- SECCIÓN 2: ASIGNACIÓN DE NUEVOS PARTICIPANTES -->
+        <h3>Añadir Nuevos Participantes:</h3>
         <div class="form-group">
-            <label for="new_user_id">Seleccionar Usuario:</label>
-            <select name="users[]" id="users" multiple>
+            <label for="users">Seleccionar Usuarios (puedes seleccionar varios):</label>
+            <!-- Select múltiple que envía un array 'users[]' con los IDs a asociar en el pivote -->
+            <select name="users[]" id="users" multiple style="height: 100px;">
                 @foreach ($users as $user)
-                    <!-- Opcional: no mostrar en el desplegable a los que ya son participantes -->
+                    <!-- Filtra en la vista para no volver a listar usuarios que ya están participando -->
                     @if (!$project->users->contains($user->id))
                         <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
                     @endif
@@ -159,27 +163,7 @@
             </select>
         </div>
 
-        <div class="form-group">
-            <label for="new_role">Rol del nuevo usuario:</label>
-            <input type="text" name="new_role" id="new_role" placeholder="Ej. Tester, Diseñador...">
-        </div>
-
-        <div class="form-group">
-            <label for="new_contribution_hours">Horas del nuevo usuario:</label>
-            <input type="number" name="new_contribution_hours" id="new_contribution_hours" value="0" min="0">
-        </div>
-
-        <div class="form-group">
-            <label for="role">Rol en el proyecto:</label>
-            <input type="text" name="role" id="role" placeholder="Ej. Desarrollador Frontend, Diseñador UI...">
-        </div>
-
-        <div class="form-group">
-            <label for="contribution_hours">Horas estimadas de contribución:</label>
-            <input type="number" name="contribution_hours" id="contribution_hours" value="0" min="0">
-        </div>
-
-        <!-- Botones de Acción -->
+        <!-- Botones de acción del formulario -->
         <div class="form-group">
             <button type="submit" class="btn">Actualizar Proyecto</button>
             <a href="{{ route('projects.index') }}" class="btn btn-cancel">Cancelar</a>
