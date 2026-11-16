@@ -57,10 +57,15 @@ class ProjectController extends Controller
         // 2. Validación de entradas del formulario:
         // 'title' obligatorio; descripción y fecha opcionales; 'status' restringido a los 4 estados permitidos
         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'due_date'    => 'nullable|date',
-            'status'      => 'required|string|in:pendiente,en_progreso,completado,cancelado',
+            'due_date' => 'nullable|date',
+            'status' => 'required|string|in:pendiente,en_progreso,completado,cancelado',
+            'existing_users' => 'nullable|array',
+            'existing_users.*.role' => 'required|string|max:100',
+            'existing_users.*.contribution_hours' => 'required|integer|min:0',
+            'users' => 'nullable|array',
+            'users.*' => 'exists:users,id',
         ]);
 
         // 3. Asignación del creador: Se inyecta el ID del usuario actual autenticado (Relación 1:N)
@@ -74,7 +79,7 @@ class ProjectController extends Controller
         if ($request->has('users')) {
             // attach() inserta los registros en la tabla pivote asignando rol y horas por defecto
             $project->users()->attach($request->users, [
-                'role'               => 'Colaborador',
+                'role' => 'Colaborador',
                 'contribution_hours' => 0,
             ]);
         }
@@ -89,15 +94,15 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        $isCreator=false;
-        
-        
+        $isCreator = false;
+
+
         // 1. Autorización: Solo el creador del proyecto puede visualizar los detalles
         if ($project->user_id == Auth::id()) {
-            $isCreator=true;
-            
+            $isCreator = true;
+
         }
-        
+
 
         // 2. Eager Loading: Carga las relaciones 'users' (tabla intermedia) y 'creator' (autor) de forma optimizada
         $users = User::all();
@@ -141,10 +146,15 @@ class ProjectController extends Controller
 
         // 2. Validación de campos principales del proyecto
         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'due_date'    => 'nullable|date',
-            'status'      => 'required|string|in:pendiente,en_progreso,completado,cancelado',
+            'due_date' => 'nullable|date',
+            'status' => 'required|string|in:pendiente,en_progreso,completado,cancelado',
+            'existing_users' => 'nullable|array',
+            'existing_users.*.role' => 'required|string|max:100',
+            'existing_users.*.contribution_hours' => 'required|integer|min:0',
+            'users' => 'nullable|array',
+            'users.*' => 'exists:users,id',
         ]);
 
         // 3. Actualiza las columnas principales de la tabla 'projects'
@@ -156,7 +166,7 @@ class ProjectController extends Controller
             foreach ($request->existing_users as $userId => $pivotData) {
                 // updateExistingPivot() actualiza únicamente la fila correspondiente en la tabla intermedia 'project_user'
                 $project->users()->updateExistingPivot($userId, [
-                    'role'               => $pivotData['role'],
+                    'role' => $pivotData['role'],
                     'contribution_hours' => $pivotData['contribution_hours'],
                 ]);
             }
@@ -166,7 +176,7 @@ class ProjectController extends Controller
         if ($request->has('users')) {
             // attach() vincula los nuevos IDs seleccionados con valores base
             $project->users()->attach($request->users, [
-                'role'               => 'Colaborador',
+                'role' => 'Colaborador',
                 'contribution_hours' => 0,
             ]);
         }

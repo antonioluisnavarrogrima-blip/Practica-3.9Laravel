@@ -122,21 +122,15 @@
 
                             <!-- Input para editar el Rol del participante en la tabla pivote -->
                             <td style="padding: 8px; border: 1px solid #ddd;">
-                                <input type="text" 
-                                       name="existing_users[{{ $user->id }}][role]" 
-                                       value="{{ $user->pivot->role }}" 
-                                       required 
-                                       style="width: 90%; padding: 6px;">
+                                <input type="text" name="existing_users[{{ $user->id }}][role]" value="{{ $user->pivot->role }}"
+                                    required style="width: 90%; padding: 6px;">
                             </td>
 
                             <!-- Input para editar las Horas del participante en la tabla pivote -->
                             <td style="padding: 8px; border: 1px solid #ddd;">
-                                <input type="number" 
-                                       name="existing_users[{{ $user->id }}][contribution_hours]" 
-                                       value="{{ $user->pivot->contribution_hours }}" 
-                                       min="0" 
-                                       required 
-                                       style="width: 70px; padding: 6px;">
+                                <input type="number" name="existing_users[{{ $user->id }}][contribution_hours]"
+                                    value="{{ $user->pivot->contribution_hours }}" min="0" required
+                                    style="width: 70px; padding: 6px;">
                             </td>
                         </tr>
                     @endforeach
@@ -169,7 +163,15 @@
             <a href="{{ route('projects.index') }}" class="btn btn-cancel">Cancelar</a>
         </div>
     </form>
-
+    @if ($errors->any())
+        <div style="color: #b91c1c; background: #fee2e2; padding: 10px; border-radius: 6px; margin-bottom: 16px;">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 </body>
 
 </html>

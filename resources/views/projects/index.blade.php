@@ -7,10 +7,16 @@
     <title>Proyectos</title>
     <!-- Estilos CSS para el formateo de la tabla y estados visuales -->
     <style>
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
         table {
             width: 100%;
+            table-layout: fixed;
             border-collapse: collapse; /* Colapsa los bordes dobles en una línea única */
-            margin-top: 15px;
             font-family: Arial, sans-serif;
         }
 
@@ -19,6 +25,14 @@
             border: 1px solid #ccc;    /* Borde gris para delimitar celdas */
             padding: 10px 12px;        /* Espacio interno para legibilidad */
             text-align: left;          /* Alineación a la izquierda */
+            vertical-align: top;
+        }
+
+        .cell-scroll {
+            width: 100%;
+            max-height: 80px;
+            overflow: auto;
+            word-wrap: break-word;
         }
 
         tr:hover {
@@ -58,25 +72,26 @@
     <br style="clear: both">
 
     <!-- Tabla que lista los proyectos del sistema -->
+    <div class="table-wrapper">
     <table>
         <thead>
             <tr>
-                <th>Título</th>
-                <th>Descripción</th>
-                <th>Fecha Límite</th>
-                <th>Estado</th>
-                <th>Acciones</th>
+                <th style="width: 20%;">Título</th>
+                <th style="width: 34%;">Descripción</th>
+                <th style="width: 14%;">Fecha Límite</th>
+                <th style="width: 12%;">Estado</th>
+                <th style="width: 20%;">Acciones</th>
             </tr>
         </thead>
         <tbody>
         {{-- forelse: Itera sobre la colección de proyectos o muestra el bloque empty si no hay registros --> --}}
         @forelse ($projects as $project)
             <tr>
-                <td>{{ $project->title }}</td>
-                <td>{{ $project->description }}</td>
-                <td>{{ $project->due_date }}</td>
-                <td>{{ $project->status }}</td>
-                <td>
+                <td><div class="cell-scroll">{{ $project->title }}</div></td>
+                <td><div class="cell-scroll">{{ $project->description }}</div></td>
+                <td><div class="cell-scroll">{{ $project->due_date }}</div></td>
+                <td><div class="cell-scroll">{{ $project->status }}</div></td>
+                <td style="white-space: nowrap;">
                     <!-- Acción: Ver detalles del proyecto individual -->
                     <a href="{{ route('projects.show', $project) }}"><button>Ver</button></a>
 
@@ -101,6 +116,7 @@
         @endforelse
         </tbody>
     </table>
+    </div>
 
 </body>
 
