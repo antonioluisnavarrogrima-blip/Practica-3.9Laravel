@@ -89,16 +89,22 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
+        $isCreator=false;
+        
+        
         // 1. Autorización: Solo el creador del proyecto puede visualizar los detalles
-        if ($project->user_id !== Auth::id()) {
-            abort(401, 'No tienes autorización para editar este proyecto.');
+        if ($project->user_id == Auth::id()) {
+            $isCreator=true;
+            
         }
+        
 
         // 2. Eager Loading: Carga las relaciones 'users' (tabla intermedia) y 'creator' (autor) de forma optimizada
+        $users = User::all();
         $project->load('users', 'creator');
 
         // 3. Retorna la vista 'resources/views/projects/show.blade.php' con el objeto $project
-        return view('projects.show', compact('project'));
+        return view('projects.show', compact('project', 'isCreator', 'users'));
     }
 
     /**

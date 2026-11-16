@@ -65,7 +65,7 @@
     <form action="{{ route('projects.update', $project) }}" method="POST">
         <!-- Token de protección obligatoria CSRF -->
         @csrf
-        <!-- @method('PUT'): Instruye a Laravel para que interprete esta petición POST como método HTTP PUT -->
+        <!-- method('PUT'): Instruye a Laravel para que interprete esta petición POST como método HTTP PUT -->
         @method('PUT')
 
         <!-- Campo: Título -->
@@ -86,7 +86,7 @@
             <input type="date" id="due_date" name="due_date" value="{{ $project->due_date }}" required>
         </div>
 
-        <!-- Campo: Estado (Usa @selected para marcar dinámicamente el estado actual) -->
+        <!-- Campo: Estado (Usa selected para marcar dinámicamente el estado actual) -->
         <div class="form-group">
             <label for="status">Estado:</label>
             <select id="status" name="status" required>
