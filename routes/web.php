@@ -8,8 +8,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProjectController;
 
 // 1. Redirección de la raíz del sitio web:
-// Cualquier petición que llegue a '/' (raíz) se redirige automáticamente por HTTP a '/projects'.
-Route::redirect('/', '/projects');
+// Cualquier petición que llegue a '/' (raíz) se redirige automáticamente por HTTP a '/projects' si está logueado, y si no se redirige a welcome.
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('projects.index');
+    }
+    return view('welcome');
+})->name('welcome');
 
 // 2. Rutas del recurso 'projects' (CRUD RESTful completo):
 // Route::resource genera las 7 rutas estándar: index, create, store, show, edit, update, destroy.

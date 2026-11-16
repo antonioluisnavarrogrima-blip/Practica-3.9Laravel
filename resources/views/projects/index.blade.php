@@ -31,7 +31,7 @@
     <!-- Barra superior de autenticación / Estado de sesión del usuario -->
     <div style="float: right;">
     @auth
-        <!-- Directiva @auth: Se ejecuta únicamente si el usuario está autenticado -->
+        <!-- Directiva auth: Se ejecuta únicamente si el usuario está autenticado -->
         <span>Has iniciado sesión como: <strong>{{ Auth::user()->name }}</strong></span>
         
         <!-- Formulario para cierre de sesión vía POST a route('logout') con token CSRF -->
@@ -40,7 +40,7 @@
             <button type="submit">Cerrar Sesión</button>
         </form>
     @else
-        <!-- Directiva @else (o @guest): Se muestra si el visitante no tiene sesión activa -->
+        <!-- Directiva else (o guest): Se muestra si el visitante no tiene sesión activa -->
         <a href="{{ route('login') }}"><button>Iniciar Sesión</button></a>
         <a href="{{ route('register') }}"><button>Registrarse</button></a>
     @endauth
@@ -69,7 +69,7 @@
             </tr>
         </thead>
         <tbody>
-        <!-- @forelse: Itera sobre la colección de proyectos o muestra el bloque @empty si no hay registros -->
+        {{-- forelse: Itera sobre la colección de proyectos o muestra el bloque empty si no hay registros --> --}}
         @forelse ($projects as $project)
             <tr>
                 <td>{{ $project->title }}</td>
